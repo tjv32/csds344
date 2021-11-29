@@ -88,3 +88,41 @@ def vigenere_decrypt_from_file(key):
     return decrypted
 
 print(vigenere_decrypt(vigenere_encrypt('message', 'testkey'), 'testkey'))
+
+
+
+def encrypt_jpg(path, key):
+    image = open(path, 'rb')
+    raw = image.read()
+    to_64 = base64.encodebytes(raw)
+
+    img_string = to_64.decode("ascii")
+
+    file_image = open("img.txt", 'w')
+    file_image.write(img_string)
+
+    encrypted = vigenere_encrypt(img_string, key)
+
+    file_encrypted = open("encrypted.txt", 'w')
+    file_encrypted.write(encrypted)
+    return encrypted
+
+
+def decrypt_to_jpg_from_file(key):
+    decrypted = vigenere_decrypt_from_file(key)
+    string_to_64 = decrypted.encode("ascii")
+    decode = base64.decodebytes(string_to_64)
+
+    decrypted_image = open('decrypted_from_file.jpg', 'wb')
+    decrypted_image.write(decode)
+    return decode
+
+
+def decrypt_to_jpg(message, key):
+    decrypted = vigenere_decrypt(message, key)
+    string_to_64 = decrypted.encode("ascii")
+    decode = base64.decodebytes(string_to_64)
+
+    decrypted_image = open('decrypted.jpg', 'wb')
+    decrypted_image.write(decode)
+    return decode
