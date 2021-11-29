@@ -107,6 +107,16 @@ def inputText(filename):
     
     return text
 
+# Read plaintext from a file
+# Convert to a binary string
+def inputTextString(text):
+    text = text.split(' ')
+    text = [eval(x) for x in text]
+    text = ['{:08b}'.format(x) for x in text]
+    text = ''.join(text)
+    
+    return text
+
 # Initial Permutation replacement of plaintext
 # Divide into left and right substrings
 def IP_Transposition(plaintext):
@@ -124,9 +134,7 @@ def IP_reverseTransp(LR):
     return tmp
 
 def inputKey(s):
-    with open(s,'r')as f:
-        key = f.read()
-    key = key.split('\n')
+    key = s.split(' ')
     key = [eval(x) for x in key]
     key = ['{:08b}'.format(x) for x in key]
     key = "".join(key)
@@ -211,7 +219,7 @@ def writeFile(filename,Cipher):
 
 # Generate subkeys for each iteration of DES 
 def generateKset(key):
-    key = inputKey(key)
+    #key = inputKey(key)
     C,D = Key_Transposition(key)
     K = []
     for i in LeftRotate:
@@ -219,6 +227,22 @@ def generateKset(key):
         C = Key_LeftRotate(D,i)
         K.append(Key_Compress(C,D))
     return K
+
+def DES_encrypt_adj(filename,key,outputFile):
+    plaintext = inputTextString(filename)
+    L,R = IP_Transposition(plaintext)
+    K = generateKset(key)
+    for i in range(0,15):
+        oldR = R
+        p_result = F(R,K[i])
+        R = xor(L,p_result)
+        L = oldR
+    p_result = F(R,K[15])
+    L = xor(L,p_result)
+    reversedP = IP_reverseTransp(L+R)
+    Cipher = generateHex(reversedP)
+    #writeFile(outputFile,Cipher)
+    return Cipher
 
 def DES_encrypt(filename,key,outputFile):
     plaintext = inputText(filename)
@@ -235,6 +259,23 @@ def DES_encrypt(filename,key,outputFile):
     Cipher = generateHex(reversedP)
     writeFile(outputFile,Cipher)
     return Cipher
+
+def DES_decrypt_adj(filename,key,outputFile):
+    Ciphertext = inputTextString(filename)
+    L,R = IP_Transposition(Ciphertext)
+    K = generateKset(key)
+    for i in range(15,0,-1):
+        oldR = R
+        p_result = F(R,K[i])
+        R = xor(L,p_result)
+        L = oldR
+    
+    p_result = F(R,K[0])
+    L = xor(L,p_result)
+    reversedP = IP_reverseTransp(L+R)
+    plaintext = generateHex(reversedP)
+    writeFile(outputFile,plaintext)
+    return plaintext
 
 def DES_decrypt(filename,key,outputFile):
     Ciphertext = inputText(filename)

@@ -17,7 +17,7 @@ def vigenere_encrypt(message, key):
         index = (mIndex + kIndex) % len(table)
         encrypted += table[index]
 
-   # print(encrypted)
+    #print(encrypted)
     return encrypted
 
 
@@ -33,7 +33,7 @@ def vigenere_decrypt(message, key):
         index = (mIndex - kIndex) % len(table)
         decrypted += table[index]
 
-    # print(decrypted)
+    #print(decrypted)
     return decrypted
 
 
@@ -46,7 +46,7 @@ def extendKey(message, key):
 
 
 def vigenere_encrypt_file_inputted(key):
-    file_path = input("File path to txt file: ")
+    file_path = '/home/thomas/Documents/Projects/csds344/vigenereCipher/encrypted.txt'
     try:
         file = open(file_path, 'r+')
         file2 = open("encrypted.txt", 'w')
@@ -87,9 +87,4 @@ def vigenere_decrypt_from_file(key):
     file_d.write(decrypted)
     return decrypted
 
-
-if __name__ == '__main__':
-    msg = "Reed is cool"
-    k = "asf12e34224vssavs"
-    encrypted_message = vigenere_encrypt_file_inputted(k)
-    decrypted = vigenere_decrypt_from_file(k)
+print(vigenere_decrypt(vigenere_encrypt('message', 'testkey'), 'testkey'))
