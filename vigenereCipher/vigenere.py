@@ -1,5 +1,5 @@
 import string
-
+import base64
 
 def vigenere_encrypt(message, key):
     table = list(string.printable)
@@ -87,23 +87,23 @@ def vigenere_decrypt_from_file(key):
     file_d.write(decrypted)
     return decrypted
 
-print(vigenere_decrypt(vigenere_encrypt('message', 'testkey'), 'testkey'))
+#print(vigenere_decrypt(vigenere_encrypt('message', 'testkey'), 'testkey'))
 
 
+def encrypt_jpg(img_string, key):
+    #image = open(path, 'rb')
+    #raw = image.read()
 
-def encrypt_jpg(path, key):
-    image = open(path, 'rb')
-    raw = image.read()
-    to_64 = base64.encodebytes(raw)
+    #to_64 = base64.encodebytes(raw)
+    #print(to_64)
+    #img_string = to_64.decode("ascii")
 
-    img_string = to_64.decode("ascii")
-
-    file_image = open("img.txt", 'w')
-    file_image.write(img_string)
+    #file_image = open("img.txt", 'w')
+    #file_image.write(img_string)
 
     encrypted = vigenere_encrypt(img_string, key)
 
-    file_encrypted = open("encrypted.txt", 'w')
+    file_encrypted = open("/home/thomas/Documents/Projects/csds344/vigenereCipher/encrypted.txt", 'w')
     file_encrypted.write(encrypted)
     return encrypted
 
@@ -120,9 +120,15 @@ def decrypt_to_jpg_from_file(key):
 
 def decrypt_to_jpg(message, key):
     decrypted = vigenere_decrypt(message, key)
+    #print(decrypted)
     string_to_64 = decrypted.encode("ascii")
     decode = base64.decodebytes(string_to_64)
 
-    decrypted_image = open('decrypted.jpg', 'wb')
+    decrypted_image = open('/home/thomas/Documents/Projects/csds344/vigenereCipher/decrypted.jpg', 'wb')
     decrypted_image.write(decode)
+    decrypted_image.close()
     return decode
+
+
+#message = encrypt_jpg('/home/thomas/Documents/Projects/csds344/vigenereCipher/example.jpg', 'testkey')
+#decrypt_to_jpg(message, 'testkey')

@@ -1,24 +1,28 @@
 import dash
-import dash_core_components as dcc
+from dash import dcc
+#from dash_extensions import send_file
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
-import dash_html_components as html
+from dash import html
 from dash_extensions import Download
+from dash_extensions.snippets import send_file
 import plotly.graph_objects as go
 
 import io
 import base64
 import datetime
 from make_app import app
-
-from vigenereCipher.vigenere import vigenere_encrypt, vigenere_decrypt
+from dash_extensions import Download
+import pathlib
+from vigenereCipher.vigenere import vigenere_encrypt, vigenere_decrypt, encrypt_jpg, decrypt_to_jpg
 
 default_message = 'This is the default message'
 
 txt_encrpyt_options = [{'label': i, 'value': i} for i in ['RSA', 'DES', 'VIG']]
 video_encrpyt_options = [{'label': i, 'value': i} for i in ['RSA', 'DES']]
 method_options = [{'label': i, 'value': i} for i in ['Encrypt', 'Decrypt']]
+method_d_options = [{'label': i, 'value': i} for i in ['Text', 'JPG']]
 
    
 
@@ -31,7 +35,7 @@ tab_title = html.H1(
     )
 
 file_input_label = html.Label(
-    children = 'Enter Text Message Below to be Encrypted or Decrypted or Input a File (txt, jpeg, or mp4)',
+    children = 'Enter Text Message Below to be Encrypted or Decrypted or Input a File (txt or jpg)',
     style={
         'textAlign': 'left',
         'color': 'black',
@@ -46,6 +50,20 @@ method_dd = dcc.Dropdown(
     )
 method_label = html.Label(
     children = 'Select Method',
+    style={
+        'textAlign': 'left',
+        'color': 'black',
+    }
+)
+
+method_dd_d = dcc.Dropdown(
+        id='method_dd_d_v',
+        options=method_d_options,
+        multi=False,
+        value='Text'
+    )
+method_label_d = html.Label(
+    children = 'Select Output',
     style={
         'textAlign': 'left',
         'color': 'black',
@@ -162,6 +180,16 @@ result_graph = dcc.Graph(
     figure=result_fig,
 )
 
+download_button = html.Div(
+    [
+        html.Button(
+            "Download Result", 
+            id="btn"
+        ), 
+        dcc.Download(id="download_vig")
+    ]
+)
+
 body_3 = html.Div(
 	[
 		dbc.Container(
@@ -189,7 +217,10 @@ body_3 = html.Div(
                                 key_msg,
                                 method_label,
                                 method_dd,
+                                method_label_d,
+                                method_dd_d,
                                 update_button,
+                                download_button,
                                 overall_msg,
                             ],
                         )
@@ -200,24 +231,15 @@ body_3 = html.Div(
                         dbc.Col(
                             [
                                 result_orig_msg
-                            ]
+                            ], width = 6
                         ),
                         dbc.Col(
                             [
                                 result_changed_msg
-                            ]
-                        )
+                            ], width = 6
+                        ), 
                     ]
                 ),
-                dbc.Row(
-                    [
-                        dbc.Col(
-                            [
-                                
-                            ]
-                        )
-                    ]
-                )
 
         	],
         	fluid = True
@@ -288,20 +310,26 @@ def create_upload_display_key(contents, filename, last_modified, mem_obj):
 def create_upload_display_plain(contents, filename, last_modified, mem_obj):
     if(contents is None):
         raise PreventUpdate
-    try:
+    if(1==1):
         if(mem_obj is None):
             mem_obj = {}
         content_type, content_string = contents.split(',')
         decoded = base64.b64decode(content_string)
+        file_ext = filename.split('.')[-1]
+        mem_obj['ext'] = file_ext
+        if(file_ext == 'txt'):
             
-        lines = io.StringIO(decoded.decode('utf-8')).read()
+            lines = io.StringIO(decoded.decode('utf-8')).read()
 
-        mem_obj['upload'] = lines
+            mem_obj['upload'] = lines
 
+
+        elif(file_ext == 'jpg'):
+            mem_obj['upload'] = base64.encodebytes(decoded).decode("ascii")
         update_msg = html.Div([
             f'{filename} successfully uploaded'
         ])
-    except:
+    else:
         mem_obj = None
         update_msg = html.Div([
             'There was an error processing this file.'
@@ -314,6 +342,7 @@ def create_upload_display_plain(contents, filename, last_modified, mem_obj):
         Output('result_orig_msg_v', 'children'),
         Output('result_changed_msg_v', 'children'),
         Output('overall_msg_v', 'children'),
+        Output('download', 'data'),
 
     ],
     [
@@ -321,6 +350,7 @@ def create_upload_display_plain(contents, filename, last_modified, mem_obj):
     ],
     [
         State('method_dd_v', 'value'),
+        State('method_dd_d_v', 'value'),
         State('plaintext_input_v', 'value'),
         State('key_input_v', 'value'),
 
@@ -330,13 +360,14 @@ def create_upload_display_plain(contents, filename, last_modified, mem_obj):
         
     ]
 )
-def update_main_view(n_clicks, method_dd, plaintext_free_input, key_free_input,
+def update_main_view(n_clicks, method_dd, output_dd, plaintext_free_input, key_free_input,
       upload_plain, upload_key):
-
-    if((key_free_input is None and
+    print('anything here')
+    if((plaintext_free_input is None and
         upload_plain is None) or
-        (plaintext_free_input == None and 
+        (key_free_input == None and 
         upload_key == None)):
+        print('prevented update')
         raise PreventUpdate
     final_key, final_plain, display_plain = '', '', ''
     if(key_free_input is not None):
@@ -349,61 +380,156 @@ def update_main_view(n_clicks, method_dd, plaintext_free_input, key_free_input,
     else:
         final_plain = upload_plain['upload']
         display_plain = final_plain
-    print('final')
-    print(final_plain)
-    print(final_key)
+    #print('final')
+    #print(final_plain)
+    #print(final_key)
     plain_key = final_key
-
+    #print(output_dd)
     #if(not isinstance(str, final_plain)):
     #    final_plain = " ".join(final_plain)
 
 
-
+    cipher = ''
 
     time_elapsed = 1
 
     orig_update, adj_update = '', ''
-    if(method_dd == 'Encrypt'):
-        begin_time = datetime.datetime.now()
-        cipher = vigenere_encrypt(final_plain, final_key)
-        time_elapsed = datetime.datetime.now() - begin_time
-        
-        orig_update = html.Div(
-            [
-                f'Plaintext: {final_plain}',
-                html.Br(),
-                f'Key: {plain_key}',
-                html.Br(),
-                f'Time Elapsed: {time_elapsed.total_seconds()} seconds'
-            ]
-        )
-        adj_update = html.Div(
-            [
-                f'Encrypted Cipher: {cipher}'
-            ]
-        )
-    elif(method_dd == 'Decrypt'):
+    if(upload_plain is not None and upload_plain['ext'] == 'jpg'):
+        if(method_dd == 'Encrypt'):
+            begin_time = datetime.datetime.now()
+            cipher = encrypt_jpg(final_plain, final_key)
+            time_elapsed = datetime.datetime.now() - begin_time
+            
+            orig_update = html.Div(
+                [
+                    f'Plaintext: {final_plain}',
+                    html.Br(),
+                    f'Key: {plain_key}',
+                    html.Br(),
+                    f'Time Elapsed: {time_elapsed.total_seconds()} seconds'
+                ]
+            )
+            adj_update = html.Div(
+                [
+                    f'Encrypted Cipher: {cipher}'
+                ]
+            )
+        elif(method_dd == 'Decrypt'):
 
-        begin_time = datetime.datetime.now()
-        cipher = vigenere_decrypt(final_plain, final_key)
-        time_elapsed = datetime.datetime.now() - begin_time
+            begin_time = datetime.datetime.now()
+            cipher = decrypt_to_jpg(final_plain, final_key)
+            time_elapsed = datetime.datetime.now() - begin_time
 
-        orig_update = html.Div(
-            [
-                f'Cipher: {final_plain}',
-                html.Br(),
-                f'Key: {plain_key}',
-                html.Br(),
-                f'Time Elapsed: {time_elapsed.total_seconds()} seconds'
-            ]
-        )
-        adj_update = html.Div(
-            [
-                f'Decrypted Plaintext: {cipher}'
-            ]
-        )
+            orig_update = html.Div(
+                [
+                    f'Cipher: {final_plain}',
+                    html.Br(),
+                    f'Key: {plain_key}',
+                    html.Br(),
+                    f'Time Elapsed: {time_elapsed.total_seconds()} seconds'
+                ]
+            )
+            adj_update = html.Div(
+                [
+                    f'Decrypted Plaintext: {cipher}'
+                ]
+            )
+
+
+
+
+
+    else:
+        if(method_dd == 'Encrypt'):
+            begin_time = datetime.datetime.now()
+            cipher = vigenere_encrypt(final_plain, final_key)
+            time_elapsed = datetime.datetime.now() - begin_time
+            
+            orig_update = html.Div(
+                [
+                    f'Plaintext: {final_plain}',
+                    html.Br(),
+                    f'Key: {plain_key}',
+                    html.Br(),
+                    f'Time Elapsed: {time_elapsed.total_seconds()} seconds'
+                ]
+            )
+            adj_update = html.Div(
+                [
+                    f'Encrypted Cipher: {cipher}'
+                ]
+            )
+        elif(method_dd == 'Decrypt' and output_dd == 'JPG'):
+
+            begin_time = datetime.datetime.now()
+            cipher = decrypt_to_jpg(final_plain, final_key)
+            time_elapsed = datetime.datetime.now() - begin_time
+
+            orig_update = html.Div(
+                [
+                    f'Cipher: {final_plain}',
+                    html.Br(),
+                    f'Key: {plain_key}',
+                    html.Br(),
+                    f'Time Elapsed: {time_elapsed.total_seconds()} seconds'
+                ]
+            )
+            adj_update = html.Div(
+                [
+                    f'Decrypted Plaintext: {cipher}'
+                ]
+            )
+        elif(method_dd == 'Decrypt' and output_dd == 'Text'):
+
+            begin_time = datetime.datetime.now()
+            cipher = vigenere_decrypt(final_plain, final_key)
+            time_elapsed = datetime.datetime.now() - begin_time
+
+            orig_update = html.Div(
+                [
+                    f'Cipher: {final_plain}',
+                    html.Br(),
+                    f'Key: {plain_key}',
+                    html.Br(),
+                    f'Time Elapsed: {time_elapsed.total_seconds()} seconds'
+                ]
+            )
+            adj_update = html.Div(
+                [
+                    f'Decrypted Plaintext: {cipher}'
+                ]
+            )
     update_msg = html.Div([
-            f'Success!'
-        ])
-    return orig_update, adj_update, update_msg
+        f'Success!'
+    ])
+    if(not isinstance(cipher, str)):
+        cipher = ''
+    return orig_update, adj_update, update_msg, {'method' : method_dd, 'format' : output_dd, 'output' : cipher}
+
+@app.callback(
+        Output("download_vig", "data"),
+        [
+            Input("btn", "n_clicks"),
+        ],
+        [
+            State('download', 'data'),
+        ],
+        prevent_initial_call=True,
+)
+def generate_csv(n_nlicks, download):
+    if(download is None):
+        raise PreventUpdate
+    # Convert data to a string.
+    s = io.StringIO()
+    o_format = '.txt'
+    if(download['format'] == 'Text'):
+        print('ello')
+        return dict(filename=f"{download['method']}.txt", content=download['output'], type="text/txt")  
+
+    else:
+        print('made it')
+        return dcc.send_file(
+        pathlib.Path("vigenereCipher/decrypted.jpg")
+        )
+
 

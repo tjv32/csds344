@@ -1,9 +1,9 @@
 import dash
-import dash_core_components as dcc
+from dash import dcc
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
-import dash_html_components as html
+from dash import html
 from dash_extensions import Download
 import plotly.graph_objects as go
 
@@ -31,7 +31,7 @@ tab_title = html.H1(
     )
 
 file_input_label = html.Label(
-    children = 'Enter Text Message Below to be Encrypted or Decrypted or Input a File (txt, jpeg, or mp4)',
+    children = 'Enter Text Message Below to be Encrypted or Decrypted or Input a File (txt)',
     style={
         'textAlign': 'left',
         'color': 'black',
