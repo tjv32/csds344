@@ -109,6 +109,13 @@ def fileInput(file):
     text = ''.join(text)
     return text
 
+def inputTextString(text):
+    text = text.split(' ')
+    text = [eval(x) for x in text]
+    text = ['{:08b}'.format(x) for x in text]
+    text = ''.join(text)
+    return text
+
 # Hex Generation
 def HexFunc(arr): 
     hex_arr = []
@@ -232,7 +239,7 @@ def DES_encrypt(file, key, outputFile):
     return Cipher
 
 def DES_encrypt_adj(file, key, outputFile): 
-    plaintext = fileInput(file)
+    plaintext = inputTextString(file)
     L,R = IP_Transpose(plaintext)
     K = Generate_Key_set(key)
     for i in range(0,15):
