@@ -3,11 +3,7 @@ import base64
 
 def vigenere_encrypt(message, key):
     table = list(string.printable)
-    # print("KEY:", key)
-    # print(message)
     keyString = extendKey(message, key)
-    # print(keyString)
-
     encrypted = ""
     for i in range(0, len(message)):
         mLetter = message[i]
@@ -16,8 +12,6 @@ def vigenere_encrypt(message, key):
         kIndex = table.index(kLetter)
         index = (mIndex + kIndex) % len(table)
         encrypted += table[index]
-
-    #print(encrypted)
     return encrypted
 
 
@@ -32,8 +26,6 @@ def vigenere_decrypt(message, key):
         kIndex = table.index(kLetter)
         index = (mIndex - kIndex) % len(table)
         decrypted += table[index]
-
-    #print(decrypted)
     return decrypted
 
 
@@ -46,7 +38,7 @@ def extendKey(message, key):
 
 
 def vigenere_encrypt_file_inputted(key):
-    file_path = '/home/thomas/Documents/Projects/csds344/vigenereCipher/encrypted.txt'
+    file_path = 'vigenereCipher/encrypted.txt'
     try:
         file = open(file_path, 'r+')
         file2 = open("encrypted.txt", 'w')
@@ -103,8 +95,8 @@ def encrypt_jpg(img_string, key):
 
     encrypted = vigenere_encrypt(img_string, key)
 
-    file_encrypted = open("/home/thomas/Documents/Projects/csds344/vigenereCipher/encrypted.txt", 'w')
-    file_encrypted.write(encrypted)
+   # file_encrypted = open("vigenereCipher/encrypted.txt", 'w')
+   # file_encrypted.write(encrypted)
     return encrypted
 
 
@@ -124,7 +116,7 @@ def decrypt_to_jpg(message, key):
     string_to_64 = decrypted.encode("ascii")
     decode = base64.decodebytes(string_to_64)
 
-    decrypted_image = open('/home/thomas/Documents/Projects/csds344/vigenereCipher/decrypted.jpg', 'wb')
+    decrypted_image = open('vigenereCipher/decrypted.jpg', 'wb')
     decrypted_image.write(decode)
     decrypted_image.close()
     return decode
