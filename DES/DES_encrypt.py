@@ -216,6 +216,16 @@ def Generate_Key_set(key):
         K.append(Compress_Key(L, R))
     return K
 
+def Generate_Key_set_adj(key):
+    key = inputTextString(key)
+    L, R = Key_Transpose(key)
+    K = []
+    for i in RotateLeft: 
+        L = Key_RotateLeft(L, i)
+        L = Key_RotateLeft(R, i)
+        K.append(Compress_Key(L, R))
+    return K
+
 def writeFile(file, Cipher): 
     f = open(file, 'w+')
     for i in range(len(Cipher)-1):
@@ -241,7 +251,7 @@ def DES_encrypt(file, key, outputFile):
 def DES_encrypt_adj(file, key, outputFile): 
     plaintext = inputTextString(file)
     L,R = IP_Transpose(plaintext)
-    K = Generate_Key_set(key)
+    K = Generate_Key_set_adj(key)
     for i in range(0,15):
         old_R = R
         permutation = F(R, K[i])
@@ -273,7 +283,7 @@ def DES_decrypt(file, key, outputFile):
 def DES_decrypt_adj(file, key, outputFile): 
     Cipher = fileInput(file)
     L,R = IP_Transpose(Cipher)
-    K = Generate_Key_set(key)
+    K = Generate_Key_set_adj(key)
     for i in range(15, 0, -1):
         old_R = R
         permutation = F(R, K[i])
