@@ -22,6 +22,7 @@ app.layout = html.Div(
 		dcc.Store(id='temp_upload_v'),
 		dcc.Store(id='temp_key_v'),
 		dcc.Store(id='download'),
+		dcc.Store(id='download_des'),
 		dcc.Store(id='current_data'),
 	    dcc.Store(id='current_selection_view'),
 	    dcc.Store(id='cluster_data'),

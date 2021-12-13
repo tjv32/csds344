@@ -101,20 +101,25 @@ def inputText(filename):
     with open(filename,'r')as f:
         text = f.read()
     text = text.split('\n')
+    #print('start')
+    #print(text)
     text = [eval(x) for x in text]
+    #print(text)
     text = ['{:08b}'.format(x) for x in text]
     text = ''.join(text)
-    
+    #print(text)
     return text
 
 # Read plaintext from a file
 # Convert to a binary string
 def inputTextString(text):
     text = text.split(' ')
+    #print('start')
     text = [eval(x) for x in text]
+    #print(text)
     text = ['{:08b}'.format(x) for x in text]
     text = ''.join(text)
-    
+    #print(text)
     return text
 
 # Initial Permutation replacement of plaintext
@@ -228,8 +233,9 @@ def generateKset(key):
         K.append(Key_Compress(C,D))
     return K
 
-def DES_encrypt_adj(filename,key,outputFile):
-    plaintext = inputTextString(filename)
+def DES_encrypt_adj(filename,key,outputFile, preprocessed = False):
+    if(not preprocessed):
+        plaintext = inputTextString(filename)
     L,R = IP_Transposition(plaintext)
     K = generateKset(key)
     for i in range(0,15):
