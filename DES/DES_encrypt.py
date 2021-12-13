@@ -110,10 +110,16 @@ def fileInput(file):
     #print(text)
     text = ['{:08b}'.format(x) for x in text]
     text = ''.join(text)
-<<<<<<< HEAD
     #print(text)
-=======
->>>>>>> 1c8ee06b009e85e895ebdbe27fb86712b22b2c21
+    return text
+
+def fileInput_ascii(file): 
+    with open(file, 'r') as f:
+        text = f.read()
+    text = ascii_Hex(text)    
+    text = [eval(x) for x in text]
+    text = ['{:08b}'.format(x) for x in text]
+    text = ''.join(text)
     return text
 
 def inputTextString(text):
@@ -123,11 +129,16 @@ def inputTextString(text):
     #print(text)
     text = ['{:08b}'.format(x) for x in text]
     text = ''.join(text)
-<<<<<<< HEAD
     #print(text)
-=======
->>>>>>> 1c8ee06b009e85e895ebdbe27fb86712b22b2c21
     return text
+
+# Convert ascii to hex 
+def ascii_Hex(str): 
+    hexArr = []
+    for c in str: 
+        h = hex(ord(c))
+        hexArr.append(h)
+    return hexArr
 
 # Hex Generation
 def HexFunc(arr): 
@@ -245,7 +256,6 @@ def writeFile(file, Cipher):
         f.write(Cipher[i]+'\n')
     f.write(Cipher[-1])
 
-<<<<<<< HEAD
 # Generate subkeys for each iteration of DES 
 def generateKset(key):
     #key = inputKey(key)
@@ -262,12 +272,10 @@ def DES_encrypt_adj(filename,key,outputFile, preprocessed = False):
         plaintext = inputTextString(filename)
     L,R = IP_Transposition(plaintext)
     K = generateKset(key)
-=======
 def DES_encrypt(file, key, outputFile): 
     plaintext = fileInput(file)
     L,R = IP_Transpose(plaintext)
     K = Generate_Key_set(key)
->>>>>>> 1c8ee06b009e85e895ebdbe27fb86712b22b2c21
     for i in range(0,15):
         old_R = R
         permutation = F(R, K[i])
