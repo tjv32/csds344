@@ -132,6 +132,13 @@ def inputTextString(text):
     #print(text)
     return text
 
+def inputTextString_ascii(text): 
+    text = ascii_Hex(text)    
+    text = [eval(x) for x in text]
+    text = ['{:08b}'.format(x) for x in text]
+    text = ''.join(text)
+    return text
+
 # Convert ascii to hex 
 def ascii_Hex(str): 
     hexArr = []
